@@ -1,8 +1,9 @@
-require 'twitter'
-require 'dotenv'
+require 'bundler'
+Bundler.require
 Dotenv.load
 
-# login
+puts 'begin'
+
 config = {
   consumer_key:         ENV['TW_CONSUMER_KEY'],
   consumer_secret:      ENV['TW_CONSUMER_SECRET'],
