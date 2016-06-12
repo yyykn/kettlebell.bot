@@ -1,21 +1,21 @@
 require 'twitter'
-
-TW_CONSUMER_KEY        = " your consumer key "
-TW_CONSUMER_SECRET     = " your consumer secret "
-TW_ACCESS_TOKEN        = " your access token "
-TW_ACCESS_TOKEN_SECRET = " your access token secret "
+require 'dotenv'
+Dotenv.load
 
 # login
-client = Twitter::Streaming::Client.new do |config|
-  config.consumer_key        = TW_CONSUMER_KEY
-  config.consumer_secret     = TW_CONSUMER_SECRET
-  config.access_token        = TW_ACCESS_TOKEN
-  config.access_token_secret = TW_ACCESS_TOKEN_SECRET
-end
+config = {
+  consumer_key:         ENV['TW_CONSUMER_KEY'],
+  consumer_secret:      ENV['TW_CONSUMER_SECRET'],
+  access_token:         ENV['TW_ACCESS_TOKEN'],
+  access_token_secret:  ENV['TW_ACCESS_TOKEN_SECRET'],
+}
 
-client.user do |object|
+client = Twitter::REST::Client.new(config)
+
+Twitter::Streaming::Client.new(config).user do |object|
   case object
   when Twitter::Tweet
-    puts 'ぽすとがあったやで'
+    p object.attrs
+    client.update("@#{object.user.screen_name} 大丈夫？ターキッシュゲットアップしとく？", in_reply_to_status_id: object.id) if object.text.include?("つらい")
   end
 end
