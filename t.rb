@@ -15,6 +15,11 @@ client = Twitter::REST::Client.new(config)
 
 Twitter::Streaming::Client.new(config).user do |object|
   case object
+  when Twitter::Streaming::Event
+    # イベントひろう
+    p object
+    # フォロー返す
+    client.follow!(object.source.id) if object.name == :follow && object.source.id != client.user('ktlbl_bot').id 
   when Twitter::Tweet
     p object.attrs
     client.update("@#{object.user.screen_name} 大丈夫？ターキッシュゲットアップしとく？", in_reply_to_status_id: object.id) if object.text.include?("つらい")
