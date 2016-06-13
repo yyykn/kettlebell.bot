@@ -2,6 +2,8 @@ require 'bundler'
 Bundler.require
 Dotenv.load
 
+SCREEN_NAME = 'ktlbl_bot'.freeze
+
 puts 'begin'
 
 config = {
@@ -19,9 +21,10 @@ Twitter::Streaming::Client.new(config).user do |object|
     # イベントひろう
     p object
     # フォロー返す
-    client.follow!(object.source.id) if object.name == :follow && object.source.id != client.user('ktlbl_bot').id 
+    client.follow!(object.source.id) if object.name == :follow && object.source.id != client.user(SCREEN_NAME).id
   when Twitter::Tweet
     p object.attrs
-    client.update("@#{object.user.screen_name} 大丈夫？ターキッシュゲットアップしとく？", in_reply_to_status_id: object.id) if object.text.include?("つらい")
+    client.update("@#{object.user.screen_name} 大丈夫？鉄塊揉む？", in_reply_to_status_id: object.id) if object.text.include?("しんどい")
+    client.favorite!(object) if object.in_reply_to_screen_name == SCREEN_NAME
   end
 end
