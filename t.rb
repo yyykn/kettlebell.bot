@@ -1,5 +1,6 @@
 require 'bundler'
 require 'yaml'
+require './pn.rb'
 Bundler.require
 Dotenv.load
 
@@ -15,6 +16,9 @@ config = {
 }
 
 client = Twitter::REST::Client.new(config)
+dic = read_dic
+nm = Natto::MeCab.new
+
 reply_words = YAML.load_file('./reply.yaml')
 w1l = reply_words['w1'].length
 
@@ -33,7 +37,8 @@ Twitter::Streaming::Client.new(config).user do |object|
     client.follow!(object.source.id) if object.name == :follow && object.source.id != client.user(SCREEN_NAME).id
   when Twitter::Tweet
     p object.attrs
-    client.update("@#{object.user.screen_name} #{get_rep_text(reply_words)}", in_reply_to_status_id: object.id) if object.text.include?("しんどい") && !object.text.include?("RT")
+    point = text2point(nm, object.text, dic)
+    client.update("@#{object.user.screen_name} #{get_rep_text(reply_words)}", in_reply_to_status_id: object.id) if point < -0.68 && !object.text.include?("RT")
     client.favorite!(object) if object.in_reply_to_screen_name == SCREEN_NAME
   end
 end
