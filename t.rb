@@ -1,4 +1,5 @@
 require 'bundler'
+require 'yaml'
 Bundler.require
 Dotenv.load
 
@@ -14,6 +15,14 @@ config = {
 }
 
 client = Twitter::REST::Client.new(config)
+reply_words = YAML.load_file('./reply.yaml')
+w1l = reply_words['w1'].length
+
+def get_rep_text(words)
+  l1 = words['w1'].length
+  l2 = words['w2'].length
+  words['w1'][rand l1] + words['w2'][rand l2]
+end
 
 Twitter::Streaming::Client.new(config).user do |object|
   case object
@@ -24,7 +33,7 @@ Twitter::Streaming::Client.new(config).user do |object|
     client.follow!(object.source.id) if object.name == :follow && object.source.id != client.user(SCREEN_NAME).id
   when Twitter::Tweet
     p object.attrs
-    client.update("@#{object.user.screen_name} 大丈夫？鉄塊揉む？", in_reply_to_status_id: object.id) if object.text.include?("しんどい")
+    client.update("@#{object.user.screen_name} #{get_rep_text(reply_words)}", in_reply_to_status_id: object.id) if object.text.include?("しんどい") && !object.text.include?("RT")
     client.favorite!(object) if object.in_reply_to_screen_name == SCREEN_NAME
   end
 end
